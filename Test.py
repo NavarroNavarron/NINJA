@@ -1,3 +1,5 @@
+from alive_progress import alive_bar, config_handler
+
 def read_data_from_file(file_path, offset, length=100):
     """
     Reads data from a file at a given offset.
@@ -37,13 +39,21 @@ file_path = r'C:\Outlive\outlive.dat'
 offset = 43644082
 chunk_size = 200
 
-# Read and display data at the given offset
-data = read_data_from_file(file_path, offset, chunk_size)
-print_data(data)
-hex_representation = " ".join(f"{byte:02x}" for byte in data)
+config_handler.set_global(length=50)
+
+# Example: Assuming we want to read multiple chunks for the demonstration
+total_chunks = 10
 
 try:
-    with open('output.txt', 'w') as file:
-        file.write(str(hex_representation))
+    with alive_bar(total_chunks, title="Reading data...") as bar:
+        for i in range(total_chunks):
+            # Adjust offset for each chunk
+            chunk_offset = offset + i * chunk_size
+            data = read_data_from_file(file_path, chunk_offset, chunk_size)
+            print_data(data)
+            hex_representation = " ".join(f"{byte:02x}" for byte in data)
+            with open('output.txt', 'a') as file:  # Append to the file
+                file.write(str(hex_representation) + "\n")
+            bar()  # Update the progress bar
 except Exception as e:
     print("Error:", e)
